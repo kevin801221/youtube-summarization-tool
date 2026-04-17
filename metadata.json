@@ -1,0 +1,6 @@
+{
+  "name": "VideoMind",
+  "description": "AI-powered YouTube video analyzer that transforms any video into beautifully organized insights using Gemini's native YouTube URL understanding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Georgia", serif;
+  --font-sans: "Inter", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Courier New", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-yt-red: #FF0000;
+  --color-yt-red-dark: #CC0000;
+  --color-accent-grad: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
+  --color-amber: #FFB84D;
+  --color-charcoal: #0F0F10;
+  --color-surface: rgba(255, 255, 255, 0.04);
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-off-white: #F5F5F5;
+  --color-muted-gray: #A1A1A6;
+}
+
+@layer base {
+  body {
+    @apply bg-charcoal text-off-white font-sans antialiased;
+    background-image: radial-gradient(circle at 50% 50%, rgba(20, 20, 22, 0.5) 0%, rgba(15, 15, 16, 1) 100%);
+    position: relative;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0.02;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    z-index: 100;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.glass-card {
+  @apply bg-surface backdrop-blur-md border border-border-subtle shadow-xl;
+}
+
+.gradient-border-hover {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+
+.gradient-border-hover::after {
+  content: "";
+  @apply absolute inset-0 border border-transparent transition-all duration-300;
+}
+
+.gradient-border-hover:hover::after {
+  @apply border-yt-red/30;
+}
+
+.timestamp-pill {
+  @apply font-mono text-xs px-2.5 py-1 rounded-md bg-surface border border-border-subtle text-amber hover:bg-yt-red/20 hover:text-white transition-colors cursor-pointer;
+}
+
+.analyze-btn {
+  @apply bg-accent-grad text-white border-none px-5 py-2 rounded-full font-semibold text-sm cursor-pointer shadow-[0_0_15px_rgba(255,0,0,0.2)] transition-all hover:scale-105 active:scale-95;
+}
+
+.tldr-card-editorial {
+  @apply bg-amber/5 border-l-4 border-amber p-6 rounded-sm;
+}
+
+.tab-item-editorial {
+  @apply py-3 text-sm text-muted-gray cursor-pointer font-medium relative transition-colors hover:text-off-white;
+}
+
+.tab-item-editorial.active {
+  @apply text-off-white;
+}
+
+.tab-item-editorial.active::after {
+  content: "";
+  @apply absolute bottom-0 left-0 w-full h-[2px] bg-yt-red;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
