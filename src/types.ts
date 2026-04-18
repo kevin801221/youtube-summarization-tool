@@ -47,6 +47,12 @@ export interface MindMapNode {
   children: string[];
 }
 
+export interface Recommendation {
+  title: string;
+  reason: string;
+  searchQuery: string;
+}
+
 export interface VideoMindAnalysis {
   metadata: VideoMetadata;
   tldr: string;
@@ -59,6 +65,7 @@ export interface VideoMindAnalysis {
   followUpQuestions: string[];
   shortsScript: ShortsScript;
   mindMapNodes: MindMapNode[];
+  recommendations?: Recommendation[];
 }
 
 export interface HistoryItem {

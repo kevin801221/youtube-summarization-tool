@@ -234,6 +234,7 @@ export default function App() {
             onAnalyze={handleAnalyze} 
             languagePref={languagePref} 
             setLanguagePref={setLanguagePref} 
+            history={history}
           />
         )}
 
@@ -348,10 +349,39 @@ export default function App() {
                   </motion.div>
                 )}
                 {activeTab === 'action' && (
-                  <motion.div key="action" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-4">
-                    {analysis.actionItems.map((item, i) => (
-                      <div key={i} className="glass-card p-5 rounded-2xl flex gap-4 items-center"><CheckCircle2 size={24} className="text-yt-red" /><p className="text-off-white font-medium">{item}</p></div>
-                    ))}
+                  <motion.div key="action" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-12">
+                    <div className="space-y-4">
+                      <h3 className="text-amber uppercase tracking-[0.2em] text-[10px] font-bold mb-4 ml-2">Direct Action Items</h3>
+                      {analysis.actionItems.map((item, i) => (
+                        <div key={i} className="glass-card p-5 rounded-2xl flex gap-4 items-center group hover:border-yt-red/30 transition-all"><CheckCircle2 size={24} className="text-yt-red" /><p className="text-off-white font-medium">{item}</p></div>
+                      ))}
+                    </div>
+
+                    {analysis.recommendations && analysis.recommendations.length > 0 && (
+                      <div className="space-y-6 pt-12 border-t border-white/5">
+                        <div className="flex items-center gap-3 ml-2">
+                          <Zap size={20} className="text-amber fill-amber" />
+                          <h3 className="text-white text-xl font-serif italic">Recommended Next Steps</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {analysis.recommendations.map((rec, i) => (
+                            <a 
+                              key={i} 
+                              href={`https://www.youtube.com/results?search_query=${encodeURIComponent(rec.searchQuery)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="glass-card p-6 rounded-2xl group hover:border-yt-red/50 transition-all relative overflow-hidden"
+                            >
+                              <div className="absolute top-0 right-0 p-3 text-muted-gray group-hover:text-yt-red transition-colors">
+                                <ArrowRight size={18} />
+                              </div>
+                              <h4 className="text-white font-bold mb-2 group-hover:text-yt-red transition-colors">{rec.title}</h4>
+                              <p className="text-xs text-muted-gray leading-relaxed">{rec.reason}</p>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

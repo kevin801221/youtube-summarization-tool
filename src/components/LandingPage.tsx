@@ -2,16 +2,17 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { 
   Zap, 
-  Search, 
   Sparkles, 
   ShieldCheck, 
   ArrowRight, 
   Youtube,
   Quote,
   Network,
-  Languages
+  Languages,
+  History
 } from 'lucide-react';
 import { PricingSection } from './PricingSection';
+import { HistoryItem } from '../types';
 
 interface LandingPageProps {
   url: string;
@@ -19,6 +20,7 @@ interface LandingPageProps {
   onAnalyze: () => void;
   languagePref: string;
   setLanguagePref: (lang: string) => void;
+  history?: HistoryItem[];
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ 
@@ -26,13 +28,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   setUrl, 
   onAnalyze, 
   languagePref, 
-  setLanguagePref 
+  setLanguagePref,
+  history = []
 }) => {
   return (
     <div className="space-y-32 pb-32">
       {/* Hero Section */}
       <section className="relative pt-12 md:pt-24 flex flex-col items-center text-center space-y-12 overflow-hidden">
-        {/* Decorative background elements */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-yt-red/10 blur-[120px] rounded-full -z-10" />
         
         <motion.div 
@@ -42,7 +44,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           className="space-y-6 max-w-4xl px-6"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-amber text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
-            <Sparkles size={12} /> Powered by Gemini 2.0 Flash
+            <Sparkles size={12} /> Powered by Gemini 2.5 Flash
           </div>
           <h1 className="text-6xl md:text-8xl font-serif italic font-bold tracking-tight text-white leading-[0.9]">
             Knowledge extracted <br /> 
@@ -53,7 +55,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </p>
         </motion.div>
 
-        {/* URL Input Area */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -102,7 +103,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </motion.div>
       </section>
 
-      {/* Feature Showcase */}
+      {/* Recent Activity (Personalized Recommendations) */}
+      {history.length > 0 && (
+        <section className="px-6 space-y-8 max-w-6xl mx-auto">
+          <div className="flex items-center gap-2">
+            <History size={16} className="text-muted-gray" />
+            <h2 className="text-xs uppercase tracking-[0.3em] text-muted-gray font-bold">Continue Discovery</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {history.slice(0, 3).map((item) => (
+              <button 
+                key={item.id} 
+                onClick={() => {
+                  setUrl(item.url);
+                  // We could trigger analysis directly but better to let user review
+                }}
+                className="glass-card p-6 rounded-2xl flex gap-4 items-center text-left group hover:border-yt-red/30 transition-all"
+              >
+                <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-yt-red/10 transition-colors">
+                  <Youtube className="text-muted-gray group-hover:text-yt-red" size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-white text-sm font-medium line-clamp-1 group-hover:text-yt-red transition-colors">{item.data.metadata.title}</h4>
+                  <p className="text-[10px] text-muted-gray uppercase tracking-widest mt-1">{new Date(item.timestamp).toLocaleDateString()}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Core Features */}
       <section className="px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         <FeatureCard 
           icon={Network} 
@@ -121,12 +152,55 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         />
       </section>
 
+      {/* Discovery / Recommendation Section */}
+      <section className="px-6 space-y-12 max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-4">
+            <h2 className="text-3xl md:text-5xl font-serif italic text-white leading-tight">Popular to Analyze</h2>
+            <p className="text-muted-gray max-w-lg">Don't have a link? Try one of these high-value sessions trending in our community.</p>
+          </div>
+          <button className="text-amber text-xs uppercase tracking-widest font-bold border-b border-amber/30 pb-1 hover:border-amber transition-all">
+            View All Trending
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <RecommendationCard 
+            title="The Future of Intelligence" 
+            channel="TED" 
+            thumbnail="https://picsum.photos/seed/ai-tech/400/225"
+            url="https://www.youtube.com/watch?v=kYI2_mS-5z8"
+            onSelect={setUrl}
+          />
+          <RecommendationCard 
+            title="Dopamine Detox Guide" 
+            channel="Better Than Yesterday" 
+            thumbnail="https://picsum.photos/seed/health/400/225"
+            url="https://www.youtube.com/watch?v=9QiE-M1LrZ4"
+            onSelect={setUrl}
+          />
+          <RecommendationCard 
+            title="How to Speak" 
+            channel="MIT OpenCourseWare" 
+            thumbnail="https://picsum.photos/seed/lecture/400/225"
+            url="https://www.youtube.com/watch?v=Vj8id8-X6Xk"
+            onSelect={setUrl}
+          />
+          <RecommendationCard 
+            title="Gemini 2.5 Demo" 
+            channel="Google DeepMind" 
+            thumbnail="https://picsum.photos/seed/gemini/400/225"
+            url="https://www.youtube.com/watch?v=XshRE_bE_xM"
+            onSelect={setUrl}
+          />
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <div id="pricing">
         <PricingSection />
       </div>
 
-      {/* Trust Quote */}
       <section className="max-w-4xl mx-auto px-6 text-center space-y-8">
         <div className="text-4xl md:text-5xl font-serif italic text-off-white/40 leading-relaxed">
           "The fastest way to learn is to skip the fluff. <span className="text-off-white">VideoMind</span> helps you go straight to the DNA of any video."
@@ -151,4 +225,25 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: str
       <p className="text-muted-gray text-base leading-relaxed font-light">{description}</p>
     </div>
   </div>
+);
+
+const RecommendationCard = ({ title, channel, thumbnail, url, onSelect }: { title: string, channel: string, thumbnail: string, url: string, onSelect: (url: string) => void }) => (
+  <button 
+    onClick={() => onSelect(url)}
+    className="flex flex-col text-left group space-y-3"
+  >
+    <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 group-hover:border-yt-red/50 transition-all">
+      <img src={thumbnail} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="w-10 h-10 rounded-full bg-yt-red flex items-center justify-center shadow-lg shadow-yt-red/20">
+          <Zap size={16} className="text-white fill-white" />
+        </div>
+      </div>
+    </div>
+    <div className="space-y-1">
+      <h4 className="text-white font-serif italic text-sm line-clamp-2 group-hover:text-yt-red transition-colors">{title}</h4>
+      <p className="text-[10px] text-muted-gray uppercase tracking-widest">{channel}</p>
+    </div>
+  </button>
 );

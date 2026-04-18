@@ -13,10 +13,13 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
   4. If the video is in another language, use English as the main content and Traditional Chinese as the translation.
   
   Focus on high-value insights, actionable takeaways, and memorable moments.
+  
+  RECOMMENDATIONS: Include 3-4 recommended follow-up search queries or video topics that would deepen the user's understanding of this specific subject.
+  
   Return the response in strictly valid JSON format according to the requested schema.`;
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     contents: [
       {
         parts: [
@@ -137,11 +140,23 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
               },
               required: ["id", "label", "children"]
             }
+          },
+          recommendations: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                reason: { type: Type.STRING },
+                searchQuery: { type: Type.STRING }
+              },
+              required: ["title", "reason", "searchQuery"]
+            }
           }
         },
         required: [
           "metadata", "tldr", "chapters", "keyInsights", "goldenQuotes", 
-          "mentalModels", "actionItems", "followUpQuestions", "shortsScript", "mindMapNodes"
+          "mentalModels", "actionItems", "followUpQuestions", "shortsScript", "mindMapNodes", "recommendations"
         ]
       }
     }
