@@ -10,18 +10,28 @@ export interface Chapter {
   title: string;
   summary: string;
   importance: 'high' | 'medium' | 'low';
+  translation?: {
+    title: string;
+    summary: string;
+  };
 }
 
 export interface Insight {
   insight: string;
   timestamp: string;
   category: 'concept' | 'data' | 'story' | 'advice';
+  translation?: {
+    insight: string;
+  };
 }
 
 export interface Quote {
   quote: string;
   timestamp: string;
   speaker: string;
+  translation?: {
+    quote: string;
+  };
 }
 
 export interface ShortsScript {
@@ -40,6 +50,7 @@ export interface MindMapNode {
 export interface VideoMindAnalysis {
   metadata: VideoMetadata;
   tldr: string;
+  tldrTranslation?: string;
   chapters: Chapter[];
   keyInsights: Insight[];
   goldenQuotes: Quote[];

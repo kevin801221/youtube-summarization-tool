@@ -4,7 +4,14 @@ import { VideoMindAnalysis } from "../types";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function analyzeVideo(youtubeUrl: string, languagePref: string = "auto"): Promise<VideoMindAnalysis> {
-  const prompt = `Analyze this YouTube video and provide a comprehensive, structured breakdown in ${languagePref === "auto" ? "the video's primary language" : languagePref}. 
+  const prompt = `Analyze this YouTube video and provide a comprehensive, structured breakdown.
+  
+  LANGUAGE DUAL-MODE REQUIREMENT:
+  1. Identify the primary language of the video.
+  2. If the video is in English, provide the main content in English and translations in Traditional Chinese (Taiwan, 繁體中文).
+  3. If the video is in Chinese (any dialect), provide the main content in Traditional Chinese (Taiwan, 繁體中文) and translations in English.
+  4. If the video is in another language, use English as the main content and Traditional Chinese as the translation.
+  
   Focus on high-value insights, actionable takeaways, and memorable moments.
   Return the response in strictly valid JSON format according to the requested schema.`;
 
@@ -13,7 +20,7 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
     contents: [
       {
         parts: [
-          { fileData: { fileUri: youtubeUrl, mimeType: "video/mp4" } }, // Note: fileUri for YouTube is supported
+          { fileData: { fileUri: youtubeUrl, mimeType: "video/mp4" } },
           { text: prompt }
         ]
       }
@@ -34,6 +41,7 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
             required: ["title", "estimatedDuration", "contentType", "primaryLanguage"]
           },
           tldr: { type: Type.STRING },
+          tldrTranslation: { type: Type.STRING },
           chapters: {
             type: Type.ARRAY,
             items: {
@@ -42,9 +50,17 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
                 timestamp: { type: Type.STRING },
                 title: { type: Type.STRING },
                 summary: { type: Type.STRING },
-                importance: { type: Type.STRING }
+                importance: { type: Type.STRING },
+                translation: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    summary: { type: Type.STRING }
+                  },
+                  required: ["title", "summary"]
+                }
               },
-              required: ["timestamp", "title", "summary", "importance"]
+              required: ["timestamp", "title", "summary", "importance", "translation"]
             }
           },
           keyInsights: {
@@ -54,9 +70,16 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
               properties: {
                 insight: { type: Type.STRING },
                 timestamp: { type: Type.STRING },
-                category: { type: Type.STRING }
+                category: { type: Type.STRING },
+                translation: {
+                  type: Type.OBJECT,
+                  properties: {
+                    insight: { type: Type.STRING }
+                  },
+                  required: ["insight"]
+                }
               },
-              required: ["insight", "timestamp", "category"]
+              required: ["insight", "timestamp", "category", "translation"]
             }
           },
           goldenQuotes: {
@@ -66,9 +89,16 @@ export async function analyzeVideo(youtubeUrl: string, languagePref: string = "a
               properties: {
                 quote: { type: Type.STRING },
                 timestamp: { type: Type.STRING },
-                speaker: { type: Type.STRING }
+                speaker: { type: Type.STRING },
+                translation: {
+                  type: Type.OBJECT,
+                  properties: {
+                    quote: { type: Type.STRING }
+                  },
+                  required: ["quote"]
+                }
               },
-              required: ["quote", "timestamp", "speaker"]
+              required: ["quote", "timestamp", "speaker", "translation"]
             }
           },
           mentalModels: {

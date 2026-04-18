@@ -34,9 +34,14 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, onJump }) => {
         className="flex-1 glass-card rounded-2xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden"
       >
         <div className="absolute top-4 left-6 text-6xl font-serif text-white/10 select-none">“</div>
-        <blockquote className="relative z-10 text-xl md:text-2xl font-serif italic text-white leading-relaxed mb-6">
+        <blockquote className="relative z-10 text-xl md:text-2xl font-serif italic text-white leading-relaxed mb-4">
           {quote.quote}
         </blockquote>
+        {quote.translation && (
+          <div className="relative z-10 text-sm md:text-base text-muted-gray mb-6 max-w-md">
+            {quote.translation.quote}
+          </div>
+        )}
         <div className="absolute bottom-4 right-6 text-6xl font-serif text-white/10 select-none">”</div>
         
         <div className="flex flex-col items-center gap-1">

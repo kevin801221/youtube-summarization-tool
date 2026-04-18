@@ -24,14 +24,12 @@ import { MindMap } from './components/MindMap';
 import { analyzeVideo } from './services/geminiService';
 import { VideoMindAnalysis, HistoryItem } from './types';
 import Markdown from 'react-markdown';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn } from './lib/utils';
+
+import { LandingPage } from './components/LandingPage';
+import { PricingSection } from './components/PricingSection';
 
 // --- Utils ---
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 const LOADING_MESSAGES = [
   "Watching video so you don't have to...",
   "Extracting golden nuggets...",
@@ -51,6 +49,7 @@ export default function App() {
   const [analysis, setAnalysis] = useState<VideoMindAnalysis | null>(null);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('chapters');
+  const [dualMode, setDualMode] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [jumpToTime, setJumpToTime] = useState<number | undefined>(undefined);
@@ -135,6 +134,13 @@ export default function App() {
     link.click();
   };
 
+  const resetApp = () => {
+    setAnalysis(null);
+    setCurrentVideoId(null);
+    setUrl('');
+    setActiveTab('chapters');
+  };
+
   const TabButton = ({ id, label, icon: Icon }: { id: string, label: string, icon: any }) => (
     <button
       onClick={() => setActiveTab(id)}
@@ -151,7 +157,7 @@ export default function App() {
   return (
     <div className="min-h-screen pb-20 selection:bg-yt-red/30">
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center glass-card border-none bg-charcoal/80">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={resetApp}>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yt-red to-yt-red-dark flex items-center justify-center shadow-lg shadow-yt-red/20">
             <Zap className="text-white fill-white" size={20} />
           </div>
@@ -160,6 +166,26 @@ export default function App() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          {!analysis && !isAnalyzing && (
+            <button 
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-xs text-muted-gray uppercase tracking-widest font-bold hover:text-white transition-colors px-4 py-2"
+            >
+              Pricing
+            </button>
+          )}
+          {analysis && (
+            <button 
+              onClick={() => setDualMode(!dualMode)} 
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm font-medium",
+                dualMode ? "bg-amber/20 text-amber border border-amber/30" : "bg-white/5 text-muted-gray hover:text-white"
+              )}
+            >
+              <Languages size={16} />
+              {dualMode ? "Dual Mode On" : "Dual Mode"}
+            </button>
+          )}
           <button onClick={() => setShowHistory(!showHistory)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-gray hover:text-white transition-colors">
             <History size={20} />
           </button>
@@ -200,28 +226,19 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <main className="max-w-6xl mx-auto px-6 pt-32">
+      <main className="max-w-6xl mx-auto px-6">
         {!analysis && !isAnalyzing && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center text-center space-y-12 py-12 md:py-24">
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Turn any video into <br /><span className="text-yt-red">actionable insights</span></h1>
-              <p className="text-muted-gray text-lg max-w-2xl mx-auto">Paste a YouTube URL and let Gemini's native video understanding decode the intelligence within.</p>
-            </div>
-            <div className="w-full max-w-3xl space-y-4">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-muted-gray group-focus-within:text-yt-red transition-colors"><Youtube size={24} /></div>
-                <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Paste YouTube video URL here..." className="w-full bg-surface border border-border-subtle hover:border-white/20 focus:border-yt-red/50 focus:ring-0 rounded-full py-5 pl-16 pr-32 text-lg transition-all outline-none backdrop-blur-xl" onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()} />
-                <button onClick={handleAnalyze} className="absolute right-2 inset-y-2 px-8 rounded-full bg-accent-grad text-white font-bold text-sm shadow-xl shadow-yt-red/20 hover:shadow-yt-red/30 hover:-translate-y-0.5 transition-all flex items-center gap-2 group/btn">Analyze<ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" /></button>
-              </div>
-              <div className="flex flex-wrap justify-center gap-4 text-xs">
-                <div className="flex items-center gap-2 text-muted-gray"><Languages size={14} /><span>Output Language:</span><select value={languagePref} onChange={(e) => setLanguagePref(e.target.value)} className="bg-white/5 border-none rounded-lg focus:ring-0 cursor-pointer hover:text-white transition-colors"><option value="auto">Auto-Detect</option><option value="English">English</option><option value="繁體中文">繁體中文</option><option value="日本語">日本語</option></select></div>
-              </div>
-            </div>
-          </motion.div>
+          <LandingPage 
+            url={url} 
+            setUrl={setUrl} 
+            onAnalyze={handleAnalyze} 
+            languagePref={languagePref} 
+            setLanguagePref={setLanguagePref} 
+          />
         )}
 
         {isAnalyzing && (
-          <div className="flex flex-col items-center justify-center py-24 space-y-12">
+          <div className="flex flex-col items-center justify-center py-48 space-y-12">
             <div className="relative"><div className="w-32 h-32 rounded-full border-4 border-white/5 border-t-yt-red animate-spin" /><div className="absolute inset-0 flex items-center justify-center"><Youtube size={32} className="text-white fill-yt-red" /></div></div>
             <div className="space-y-4 text-center">
               <motion.p key={loadingMsgIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-2xl font-serif italic text-white">{LOADING_MESSAGES[loadingMsgIdx]}</motion.p>
@@ -231,7 +248,7 @@ export default function App() {
         )}
 
         {analysis && !isAnalyzing && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 pt-32">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
               <div className="lg:col-span-7 space-y-8">
                 {currentVideoId && <YouTubePlayer videoId={currentVideoId} currentTime={jumpToTime} />}
@@ -241,6 +258,11 @@ export default function App() {
                     <div className="prose prose-invert prose-sm max-w-none font-serif text-lg italic leading-relaxed text-off-white">
                       <Markdown>{analysis.tldr}</Markdown>
                     </div>
+                    {dualMode && analysis.tldrTranslation && (
+                      <div className="prose prose-invert prose-sm max-w-none font-serif text-base italic leading-relaxed text-muted-gray mt-4 border-t border-white/5 pt-4">
+                        <Markdown>{analysis.tldrTranslation}</Markdown>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -282,6 +304,12 @@ export default function App() {
                         <div className="flex-1 space-y-2 pl-4 border-l border-border-subtle">
                           <h4 className="text-xl font-bold group-hover:text-yt-red transition-colors font-serif">{chapter.title}</h4>
                           <p className="text-muted-gray text-sm">{chapter.summary}</p>
+                          {dualMode && chapter.translation && (
+                            <div className="mt-2 text-xs text-muted-gray/80 border-t border-white/5 pt-2">
+                              <p className="font-bold mb-1">{chapter.translation.title}</p>
+                              <p>{chapter.translation.summary}</p>
+                            </div>
+                          )}
                         </div>
 
                         <button onClick={() => jumpTo(chapter.timestamp)} className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"><Play size={20} className="fill-white" /></button>
@@ -295,6 +323,11 @@ export default function App() {
                       <div key={i} className="glass-card rounded-2xl p-6 flex flex-col hover:translate-y-[-4px] transition-transform">
                         <div className="flex items-center justify-between mb-4"><span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase bg-white/10">{insight.category}</span><button onClick={() => jumpTo(insight.timestamp)} className="timestamp-pill">{insight.timestamp}</button></div>
                         <p className="text-off-white font-medium italic">"{insight.insight}"</p>
+                        {dualMode && insight.translation && (
+                          <div className="mt-4 pt-4 border-t border-white/5 text-sm text-muted-gray italic">
+                            {insight.translation.insight}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </motion.div>
