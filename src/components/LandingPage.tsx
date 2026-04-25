@@ -21,6 +21,7 @@ interface LandingPageProps {
   languagePref: string;
   setLanguagePref: (lang: string) => void;
   history?: HistoryItem[];
+  t: any;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ 
@@ -29,7 +30,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onAnalyze, 
   languagePref, 
   setLanguagePref,
-  history = []
+  history = [],
+  t
 }) => {
   return (
     <div className="space-y-32 pb-32">
@@ -47,11 +49,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <Sparkles size={12} /> Powered by Gemini 2.5 Flash
           </div>
           <h1 className="text-6xl md:text-8xl font-serif italic font-bold tracking-tight text-white leading-[0.9]">
-            Knowledge extracted <br /> 
-            <span className="text-transparent bg-clip-text bg-accent-grad">at the speed of light.</span>
+            {t.hero_title}
           </h1>
           <p className="text-muted-gray text-xl md:text-2xl max-w-2xl mx-auto font-light">
-            VideoMind transforms any YouTube video into deeply organized insights, mind maps, and viral shorts in seconds.
+            {t.hero_sub}
           </p>
         </motion.div>
 
@@ -69,7 +70,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               type="text" 
               value={url} 
               onChange={(e) => setUrl(e.target.value)} 
-              placeholder="Paste your video URL (TED talk, Tutorial, or Short)..." 
+              placeholder={t.placeholder} 
               className="w-full bg-surface border border-border-subtle hover:border-white/20 focus:border-yt-red/50 focus:ring-0 rounded-full py-6 pl-16 pr-36 text-lg transition-all outline-none backdrop-blur-xl"
               onKeyDown={(e) => e.key === 'Enter' && onAnalyze()}
             />
@@ -77,27 +78,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               onClick={onAnalyze} 
               className="absolute right-2 inset-y-2 px-8 rounded-full bg-accent-grad text-white font-bold text-sm shadow-xl shadow-yt-red/20 hover:shadow-yt-red/30 hover:-translate-y-0.5 transition-all flex items-center gap-2 group/btn"
             >
-              Analyze <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+              {t.analyze} <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
             </button>
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 text-[11px] text-muted-gray uppercase tracking-widest font-bold">
             <div className="flex items-center gap-2">
               <Languages size={14} className="text-amber" />
-              <span>Language:</span>
+              <span>{t.lang}:</span>
               <select 
                 value={languagePref} 
                 onChange={(e) => setLanguagePref(e.target.value)}
                 className="bg-transparent border-none p-0 focus:ring-0 cursor-pointer hover:text-white transition-colors"
               >
-                <option value="auto">Auto-Detect</option>
-                <option value="English">English</option>
-                <option value="繁體中文">繁體中文</option>
+                <option value="auto">{t.auto}</option>
+                <option value="English">{t.en}</option>
+                <option value="繁體中文">{t.zhtw}</option>
                 <option value="日本語">日本語</option>
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <ShieldCheck size={14} className="text-green-500" /> No Registration Required
+              <ShieldCheck size={14} className="text-green-500" /> {t.no_reg}
             </div>
           </div>
         </motion.div>
@@ -108,7 +109,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <section className="px-6 space-y-8 max-w-6xl mx-auto">
           <div className="flex items-center gap-2">
             <History size={16} className="text-muted-gray" />
-            <h2 className="text-xs uppercase tracking-[0.3em] text-muted-gray font-bold">Continue Discovery</h2>
+            <h2 className="text-xs uppercase tracking-[0.3em] text-muted-gray font-bold">{t.recent}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {history.slice(0, 3).map((item) => (
@@ -137,18 +138,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         <FeatureCard 
           icon={Network} 
-          title="Conceptual Mind Mapping" 
-          description="Visualize the core architecture of ideas with interactive force-directed graphs built instantly from video content." 
+          title={t.features.mindmap.title} 
+          description={t.features.mindmap.desc} 
         />
         <FeatureCard 
           icon={Quote} 
-          title="Editorial Quote Cards" 
-          description="Capture golden nuggets as beautiful, shareable cards for Instagram or Threads with automatic source attribution." 
+          title={t.features.quotes.title} 
+          description={t.features.quotes.desc} 
         />
         <FeatureCard 
           icon={Zap} 
-          title="Sub-second Intelligence" 
-          description="Native YouTube understanding means no more waiting for transcripts. Gemini watches the video just like you do." 
+          title={t.features.speed.title} 
+          description={t.features.speed.desc} 
         />
       </section>
 
@@ -156,11 +157,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="px-6 space-y-12 max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-5xl font-serif italic text-white leading-tight">Popular to Analyze</h2>
-            <p className="text-muted-gray max-w-lg">Don't have a link? Try one of these high-value sessions trending in our community.</p>
+            <h2 className="text-3xl md:text-5xl font-serif italic text-white leading-tight">{t.popular}</h2>
+            <p className="text-muted-gray max-w-lg">{t.popularSub}</p>
           </div>
           <button className="text-amber text-xs uppercase tracking-widest font-bold border-b border-amber/30 pb-1 hover:border-amber transition-all">
-            View All Trending
+            {t.trending_all}
           </button>
         </div>
 
@@ -198,16 +199,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Pricing Section */}
       <div id="pricing">
-        <PricingSection />
+        <PricingSection t={t} />
       </div>
 
       <section className="max-w-4xl mx-auto px-6 text-center space-y-8">
         <div className="text-4xl md:text-5xl font-serif italic text-off-white/40 leading-relaxed">
-          "The fastest way to learn is to skip the fluff. <span className="text-off-white">VideoMind</span> helps you go straight to the DNA of any video."
+          {t.learning_dna.split('VideoMind').map((part: string, i: number) => (
+            <React.Fragment key={i}>
+              {part}
+              {i === 0 && <span className="text-off-white">VideoMind</span>}
+            </React.Fragment>
+          ))}
         </div>
         <div className="flex items-center justify-center gap-4">
           <div className="w-12 h-px bg-white/10" />
-          <span className="text-[10px] uppercase tracking-[0.3em] text-muted-gray">A New Era of Learning</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-muted-gray">{t.new_era}</span>
           <div className="w-12 h-px bg-white/10" />
         </div>
       </section>

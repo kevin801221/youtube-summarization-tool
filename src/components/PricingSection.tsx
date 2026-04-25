@@ -12,55 +12,46 @@ interface PricingTier {
   cta: string;
 }
 
-const tiers: PricingTier[] = [
-  {
-    name: "Starter",
-    price: "$3",
-    limit: "5 Analysis",
-    features: [
-      "Gemini 2.0 Flash Engine",
-      "Interactive Mind Map",
-      "Bilingual Support",
-      "Export to Markdown"
-    ],
-    cta: "Start Analyzing"
-  },
-  {
-    name: "Pro",
-    price: "$5",
-    limit: "8 Analysis",
-    popular: true,
-    features: [
-      "Everything in Starter",
-      "High-Priority Processing",
-      "Dual-Mode Translation",
-      "Unlimited History",
-      "Advanced Quote Cards"
-    ],
-    cta: "Go Pro"
-  },
-  {
-    name: "Elite",
-    price: "$8",
-    limit: "12 Analysis",
-    features: [
-      "Everything in Pro",
-      "Batch Processing",
-      "Custom Export Formats",
-      "Early Access to Features",
-      "Commercial Usage"
-    ],
-    cta: "Get Elite"
-  }
-];
+interface PricingSectionProps {
+  t: any;
+}
 
-export const PricingSection: React.FC = () => {
+export const PricingSection: React.FC<PricingSectionProps> = ({ t }) => {
+  const tiers: PricingTier[] = [
+    {
+      name: t.pricing_plans.starter.name,
+      price: "$3",
+      limit: `5 ${t.pricing_plans.limit}`,
+      features: t.pricing_plans.starter.features,
+      cta: t.pricing_plans.starter.cta
+    },
+    {
+      name: t.pricing_plans.pro.name,
+      price: "$5",
+      limit: `8 ${t.pricing_plans.limit}`,
+      popular: true,
+      features: t.pricing_plans.pro.features,
+      cta: t.pricing_plans.pro.cta
+    },
+    {
+      name: t.pricing_plans.elite.name,
+      price: "$8",
+      limit: `12 ${t.pricing_plans.limit}`,
+      features: t.pricing_plans.elite.features,
+      cta: t.pricing_plans.elite.cta
+    }
+  ];
+
   return (
     <section className="py-24 px-6 relative overflow-hidden">
       <div className="max-w-6xl mx-auto space-y-16">
         <div className="text-center space-y-4">
-          <h2 className="text-4xl md:text-6xl font-serif italic text-white tracking-tight">Simple, transparent pricing</h2>
-          <p className="text-muted-gray text-lg max-w-xl mx-auto">Choose the plan that fits your learning velocity. No subscriptions, just value.</p>
+          <h2 className="text-4xl md:text-6xl font-serif italic text-white tracking-tight">
+            {t.pricing_plans.title}
+          </h2>
+          <p className="text-muted-gray text-lg max-w-xl mx-auto">
+            {t.pricing_plans.sub}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -78,7 +69,7 @@ export const PricingSection: React.FC = () => {
             >
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yt-red text-white text-[10px] uppercase font-bold px-4 py-1.5 rounded-full tracking-widest shadow-lg shadow-yt-red/20 z-10">
-                  Most Popular
+                  {t.pricing_plans.popular}
                 </div>
               )}
 

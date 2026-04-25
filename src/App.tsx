@@ -25,9 +25,11 @@ import { analyzeVideo } from './services/geminiService';
 import { VideoMindAnalysis, HistoryItem } from './types';
 import Markdown from 'react-markdown';
 import { cn } from './lib/utils';
+import { UI_TRANSLATIONS, UILang } from './lib/translations';
 
 import { LandingPage } from './components/LandingPage';
 import { PricingSection } from './components/PricingSection';
+import { Sun, Moon, Globe } from 'lucide-react';
 
 // --- Utils ---
 const LOADING_MESSAGES = [
@@ -54,6 +56,28 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [jumpToTime, setJumpToTime] = useState<number | undefined>(undefined);
   const [languagePref, setLanguagePref] = useState('auto');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [uiLang, setUiLang] = useState<UILang>('zh-tw');
+
+  const t = { ...UI_TRANSLATIONS[uiLang], uiLang };
+
+  // --- Theme Effect ---
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('videomind_theme') as 'dark' | 'light';
+    const savedLang = localStorage.getItem('videomind_lang') as UILang;
+    
+    if (savedTheme) setTheme(savedTheme);
+    if (savedLang) setUiLang(savedLang);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('light', theme === 'light');
+    localStorage.setItem('videomind_theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('videomind_lang', uiLang);
+  }, [uiLang]);
 
   // --- Persistence ---
   useEffect(() => {
@@ -79,7 +103,7 @@ export default function App() {
     let interval: any;
     if (isAnalyzing) {
       interval = setInterval(() => {
-        setLoadingMsgIdx(prev => (prev + 1) % LOADING_MESSAGES.length);
+        setLoadingMsgIdx(prev => (prev + 1) % t.loading_messages.length);
       }, 3000);
     }
     return () => clearInterval(interval);
@@ -89,7 +113,7 @@ export default function App() {
   const handleAnalyze = async () => {
     const videoId = parseYouTubeUrl(url);
     if (!videoId) {
-      alert("Please enter a valid YouTube URL");
+      alert(t.invalid_url);
       return;
     }
 
@@ -100,9 +124,12 @@ export default function App() {
       const result = await analyzeVideo(url, languagePref);
       setAnalysis(result);
       saveToHistory(videoId, url, result);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Analysis failed. Please check the console and try again.");
+      const msg = error.message?.includes('Quota') ? t.quota_exceeded : 
+                  error.message?.includes('JSON') ? t.malformed_data : 
+                  t.analysis_failed;
+      alert(msg);
     } finally {
       setIsAnalyzing(false);
     }
@@ -171,9 +198,35 @@ export default function App() {
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
               className="text-xs text-muted-gray uppercase tracking-widest font-bold hover:text-white transition-colors px-4 py-2"
             >
-              Pricing
+              {t.pricing}
             </button>
           )}
+          <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/5">
+            <button 
+              onClick={() => setTheme('dark')} 
+              className={cn("p-1.5 rounded-full transition-all", theme === 'dark' ? "bg-white/10 text-amber" : "text-muted-gray hover:text-white")}
+            >
+              <Moon size={14} />
+            </button>
+            <button 
+              onClick={() => setTheme('light')} 
+              className={cn("p-1.5 rounded-full transition-all", theme === 'light' ? "bg-white/10 text-amber" : "text-muted-gray hover:text-white")}
+            >
+              <Sun size={14} />
+            </button>
+          </div>
+          
+          <div className="relative group">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-muted-gray hover:text-white text-xs font-bold transition-all">
+              <Globe size={14} /> {uiLang.toUpperCase()}
+            </button>
+            <div className="absolute right-0 top-full mt-2 w-32 glass-card rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <button onClick={() => setUiLang('en')} className="w-full text-left px-4 py-2 hover:bg-white/5 text-xs">English</button>
+              <button onClick={() => setUiLang('zh-tw')} className="w-full text-left px-4 py-2 hover:bg-white/5 text-xs">繁體中文</button>
+              <button onClick={() => setUiLang('zh-cn')} className="w-full text-left px-4 py-2 hover:bg-white/5 text-xs">简体中文</button>
+            </div>
+          </div>
+
           {analysis && (
             <button 
               onClick={() => setDualMode(!dualMode)} 
@@ -183,18 +236,18 @@ export default function App() {
               )}
             >
               <Languages size={16} />
-              {dualMode ? "Dual Mode On" : "Dual Mode"}
+              {dualMode ? `${t.dual_mode} On` : t.dual_mode}
             </button>
           )}
-          <button onClick={() => setShowHistory(!showHistory)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-gray hover:text-white transition-colors">
+          <button onClick={() => setShowHistory(!showHistory)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-muted-gray hover:text-white transition-colors" title={t.history}>
             <History size={20} />
           </button>
           {analysis && (
             <div className="relative group">
               <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all">
-                <Download size={16} /> Export
+                <Download size={16} /> {t.export}
               </button>
-              <div className="absolute right-0 top-full mt-2 w-48 py-2 glass-card rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+              <div className="absolute right-0 top-full mt-2 w-48 py-2 glass-card rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 <button onClick={() => handleExport('markdown')} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm">Markdown (.md)</button>
               </div>
             </div>
@@ -208,10 +261,10 @@ export default function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowHistory(false)} className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm" />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed right-0 top-0 bottom-0 w-80 bg-charcoal-lighter z-[70] shadow-2xl p-6 overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold flex items-center gap-2"><History size={18} /> History</h2>
+                <h2 className="text-xl font-bold flex items-center gap-2"><History size={18} /> {t.history}</h2>
                 <button onClick={() => setShowHistory(false)} className="text-muted-gray hover:text-white"><ChevronRight size={20} /></button>
               </div>
-              {history.length === 0 ? <p className="text-center py-12 text-muted-gray">History is empty</p> : (
+              {history.length === 0 ? <p className="text-center py-12 text-muted-gray">{t.history_empty}</p> : (
                 <div className="space-y-4">
                   {history.map((item) => (
                     <button key={item.id} onClick={() => handleHistoryItemClick(item)} className="w-full text-left p-3 rounded-xl border border-white/5 hover:border-yt-red/30 transition-all group">
@@ -235,6 +288,7 @@ export default function App() {
             languagePref={languagePref} 
             setLanguagePref={setLanguagePref} 
             history={history}
+            t={t}
           />
         )}
 
@@ -242,7 +296,7 @@ export default function App() {
           <div className="flex flex-col items-center justify-center py-48 space-y-12">
             <div className="relative"><div className="w-32 h-32 rounded-full border-4 border-white/5 border-t-yt-red animate-spin" /><div className="absolute inset-0 flex items-center justify-center"><Youtube size={32} className="text-white fill-yt-red" /></div></div>
             <div className="space-y-4 text-center">
-              <motion.p key={loadingMsgIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-2xl font-serif italic text-white">{LOADING_MESSAGES[loadingMsgIdx]}</motion.p>
+              <motion.p key={loadingMsgIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-2xl font-serif italic text-white">{t.loading_messages[loadingMsgIdx]}</motion.p>
               <div className="w-64 h-1.5 bg-white/5 rounded-full overflow-hidden mx-auto"><motion.div initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 15, ease: "linear" }} className="h-full bg-yt-red" /></div>
             </div>
           </div>
@@ -255,7 +309,7 @@ export default function App() {
                 {currentVideoId && <YouTubePlayer videoId={currentVideoId} currentTime={jumpToTime} />}
                 <div className="relative group">
                   <div className="tldr-card-editorial group-hover:border-yt-red/10 transition-all">
-                    <h3 className="text-amber uppercase tracking-[0.2em] text-[10px] font-bold mb-4">The core message</h3>
+                    <h3 className="text-amber uppercase tracking-[0.2em] text-[10px] font-bold mb-4">{t.tldr}</h3>
                     <div className="prose prose-invert prose-sm max-w-none font-serif text-lg italic leading-relaxed text-off-white">
                       <Markdown>{analysis.tldr}</Markdown>
                     </div>
@@ -274,8 +328,8 @@ export default function App() {
                     <h1 className="text-3xl font-bold leading-tight font-serif">{analysis.metadata.title}</h1>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5"><span className="text-muted-gray text-[10px] uppercase font-bold block mb-1">Duration</span><span className="font-mono text-sm">{analysis.metadata.estimatedDuration}</span></div>
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5"><span className="text-muted-gray text-[10px] uppercase font-bold block mb-1">Language</span><span className="text-sm">{analysis.metadata.primaryLanguage}</span></div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5"><span className="text-muted-gray text-[10px] uppercase font-bold block mb-1">{t.duration}</span><span className="font-mono text-sm">{analysis.metadata.estimatedDuration}</span></div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/5"><span className="text-muted-gray text-[10px] uppercase font-bold block mb-1">{t.lang}</span><span className="text-sm">{analysis.metadata.primaryLanguage}</span></div>
                   </div>
                 </div>
               </div>
@@ -283,12 +337,12 @@ export default function App() {
 
             <div className="sticky top-[72px] z-40 py-4 -mx-6 px-6 bg-charcoal/80 backdrop-blur-xl border-b border-white/5 mb-8">
               <div className="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <TabButton id="chapters" label="Chapters" icon={ListOrdered} />
-                <TabButton id="insights" label="Insights" icon={Lightbulb} />
-                <TabButton id="quotes" label="Quotes" icon={QuoteIcon} />
-                <TabButton id="mindmap" label="Mind Map" icon={Network} />
-                <TabButton id="shorts" label="Shorts Script" icon={Clapperboard} />
-                <TabButton id="action" label="Takeaways" icon={CheckCircle2} />
+                <TabButton id="chapters" label={t.chapters} icon={ListOrdered} />
+                <TabButton id="insights" label={t.insights} icon={Lightbulb} />
+                <TabButton id="quotes" label={t.quotes} icon={QuoteIcon} />
+                <TabButton id="mindmap" label={t.mindmap} icon={Network} />
+                <TabButton id="shorts" label={t.shorts} icon={Clapperboard} />
+                <TabButton id="action" label={t.takeaways} icon={CheckCircle2} />
               </div>
             </div>
 
@@ -351,7 +405,7 @@ export default function App() {
                 {activeTab === 'action' && (
                   <motion.div key="action" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-12">
                     <div className="space-y-4">
-                      <h3 className="text-amber uppercase tracking-[0.2em] text-[10px] font-bold mb-4 ml-2">Direct Action Items</h3>
+                      <h3 className="text-amber uppercase tracking-[0.2em] text-[10px] font-bold mb-4 ml-2">{t.takeaways}</h3>
                       {analysis.actionItems.map((item, i) => (
                         <div key={i} className="glass-card p-5 rounded-2xl flex gap-4 items-center group hover:border-yt-red/30 transition-all"><CheckCircle2 size={24} className="text-yt-red" /><p className="text-off-white font-medium">{item}</p></div>
                       ))}
@@ -361,7 +415,7 @@ export default function App() {
                       <div className="space-y-6 pt-12 border-t border-white/5">
                         <div className="flex items-center gap-3 ml-2">
                           <Zap size={20} className="text-amber fill-amber" />
-                          <h3 className="text-white text-xl font-serif italic">Recommended Next Steps</h3>
+                          <h3 className="text-white text-xl font-serif italic">{t.recommended}</h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {analysis.recommendations.map((rec, i) => (
@@ -391,7 +445,7 @@ export default function App() {
       </main>
 
       <footer className="mt-32 border-t border-white/5 py-12 text-center text-[10px] text-muted-gray italic">
-        © 2026 VideoMind AI Studio. Built with passion for knowledge extraction.
+        {t.footer}
       </footer>
     </div>
   );
